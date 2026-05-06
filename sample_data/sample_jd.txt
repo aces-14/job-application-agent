@@ -1,0 +1,43 @@
+Software Engineer — Backend Platform
+Company: Acme Corp
+Location: Remote (US/PH timezone overlap preferred)
+Type: Full-time
+
+About the Role
+We are looking for a Backend Software Engineer to join our Platform team.
+You will own core infrastructure services, design APIs consumed by our
+mobile and web clients, and help scale our systems to the next 10x of users.
+
+Requirements
+- 3+ years of professional Python experience
+- Strong understanding of REST API design and HTTP protocols
+- Experience designing and optimizing PostgreSQL schemas
+- Familiarity with Redis for caching and session management
+- Experience with Docker containers and container orchestration (Kubernetes)
+- Comfort working with cloud platforms — we run on AWS (EC2, RDS, S3, Lambda)
+- Strong written communication — we are async-first
+
+Nice to Have
+- FastAPI or Django REST Framework experience
+- Message queue experience (Kafka or RabbitMQ)
+- CI/CD pipeline setup (GitHub Actions, CircleCI)
+- Experience with distributed systems and microservices
+- Exposure to monitoring tools (Datadog, Grafana)
+
+What You Will Do
+- Design, build, and maintain scalable Python backend services
+- Write comprehensive tests (unit, integration) — we aim for >80% coverage
+- Collaborate with frontend engineers to define API contracts
+- Participate in architecture discussions and technical design reviews
+- Review pull requests and provide constructive technical feedback
+- Help with incident response and on-call rotation
+- Document systems and APIs thoroughly
+
+What We Value
+- Ownership — you ship features end-to-end, not just tickets
+- Speed with quality — we move fast but we do not cut corners on testing
+- Technical clarity — we prefer simple solutions over clever ones
+- Collaboration — async communication, written over spoken
+
+Our Stack
+Python 3.11, FastAPI, PostgreSQL 15, Redis, Docker, Kubernetes, AWS, GitHub Actions

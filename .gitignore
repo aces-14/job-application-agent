@@ -1,4 +1,5 @@
 .env
+.claude/
 venv/
 __pycache__/
 *.pyc
@@ -6,3 +7,8 @@ __pycache__/
 *.db
 .DS_Store
 outputs/
+logs/
+sample_data/resume.pdf
+sample_data/*.pdf
+sample_data/resume.docx
+sample_data/*.docx
