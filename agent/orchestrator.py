@@ -161,7 +161,7 @@ def run_streaming(
 
         audit.add_entry(
             step="parse_resume",
-            action="Parsed resume PDF",
+            action="Parsed resume DOCX",
             input_summary=f"{len(resume_bytes):,} bytes",
             output_summary=(
                 f"{resume.full_name} | "
@@ -327,7 +327,7 @@ def run_streaming(
             },
         )
 
-        resume_path = generate_resume_docx(tailored, session_id)
+        resume_path = generate_resume_docx(tailored, session_id, resume_bytes)
         cl_path, out_path = generate_text_outputs(cover_letter, outreach, session_id)
         report_path = generate_match_report(
             match_matrix, integrity_report, tailored.changelog, session_id

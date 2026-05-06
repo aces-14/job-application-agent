@@ -1,3 +1,4 @@
+import io
 import os
 import json
 from datetime import datetime
@@ -14,7 +15,76 @@ logger = setup_logger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Internal helpers
+# Template-based helpers (preserve original formatting)
+# ---------------------------------------------------------------------------
+
+def _all_paragraphs(doc: Document):
+    """Yield every paragraph in the document, including those inside tables."""
+    yield from doc.paragraphs
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                yield from cell.paragraphs
+
+
+def _set_para_text(para, new_text: str) -> None:
+    """
+    Replace a paragraph's text in-place, keeping the first run's character
+    formatting (font, size, bold) for the entire replacement.
+    Subsequent runs are cleared so text isn't doubled.
+    """
+    if not para.runs:
+        para.add_run(new_text)
+        return
+    para.runs[0].text = new_text
+    for run in para.runs[1:]:
+        run.text = ""
+
+
+def _apply_changes_to_template(
+    tailored: TailoredResume,
+    original_bytes: bytes,
+    path: str,
+) -> bool:
+    """
+    Load the original .docx, apply each changelog change in-place, and save.
+    Returns True on success, False if the template approach should be skipped.
+    """
+    try:
+        doc = Document(io.BytesIO(original_bytes))
+        paras = list(_all_paragraphs(doc))
+        applied = 0
+
+        for change in tailored.changelog:
+            if not change.original or not change.revised:
+                continue
+            needle = change.original.strip()
+            for para in paras:
+                if needle in para.text:
+                    new_text = para.text.replace(needle, change.revised.strip())
+                    _set_para_text(para, new_text)
+                    applied += 1
+                    break
+                # Partial match — try first 50 chars (LLM sometimes truncates original)
+                if len(needle) > 50 and needle[:50] in para.text:
+                    _set_para_text(para, change.revised.strip())
+                    applied += 1
+                    break
+
+        doc.save(path)
+        logger.info(
+            f"Template resume saved: {path} "
+            f"({applied}/{len(tailored.changelog)} changes applied)"
+        )
+        return True
+
+    except Exception as e:
+        logger.warning(f"Template approach failed ({e}), falling back to rebuild")
+        return False
+
+
+# ---------------------------------------------------------------------------
+# Fallback: rebuilt from scratch (used when no original bytes are available)
 # ---------------------------------------------------------------------------
 
 def _section_heading(doc: Document, text: str) -> None:
@@ -52,15 +122,29 @@ def _normal(doc: Document, text: str, size: int = 10, bold: bool = False, italic
 # Public generators
 # ---------------------------------------------------------------------------
 
-def generate_resume_docx(tailored: TailoredResume, session_id: str) -> str:
+def generate_resume_docx(
+    tailored: TailoredResume,
+    session_id: str,
+    original_docx_bytes: Optional[bytes] = None,
+) -> str:
     """
-    Convert TailoredResume into a formatted Word document.
+    Produce the tailored resume as a Word document.
+
+    If original_docx_bytes is supplied, changes are applied in-place onto the
+    original .docx so the candidate's formatting is fully preserved.
+    Falls back to a clean rebuild if the template approach fails.
 
     Returns the file path.
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     path = f"{OUTPUT_DIR}/resume_{session_id}.docx"
 
+    # Prefer template approach — preserves candidate's original formatting
+    if original_docx_bytes:
+        if _apply_changes_to_template(tailored, original_docx_bytes, path):
+            return path
+
+    # Fallback: rebuild from scratch
     doc = Document()
 
     # ── Narrow margins for a clean look ──────────────────────────────────

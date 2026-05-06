@@ -139,7 +139,7 @@ def _skill_matches(resume_skill: str, jd_skill: str) -> bool:
     if r == j:
         return True
     shorter, longer = (r, j) if len(r) <= len(j) else (j, r)
-    return len(shorter) >= 4 and shorter in longer
+    return len(shorter) >= 3 and shorter in longer
 
 
 def _partition_skills(
