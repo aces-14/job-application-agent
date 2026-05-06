@@ -467,7 +467,6 @@ def build_app() -> gr.Blocks:
         theme=gr.themes.Soft(
             primary_hue="blue",
             neutral_hue="slate",
-            font=gr.themes.GoogleFont("Inter"),
         ),
         css=CSS,
         title="Job Application Assistant",
@@ -497,7 +496,6 @@ def build_app() -> gr.Blocks:
                 generate_btn = gr.Button(
                     "Generate Application Package",
                     variant="primary",
-                    size="lg",
                     elem_id="generate-btn",
                 )
 
@@ -508,13 +506,12 @@ def build_app() -> gr.Blocks:
                 with gr.Tabs():
 
                     with gr.Tab("Match Report"):
-                        score_display = gr.HTML(label="")
+                        score_display = gr.HTML()
 
                     with gr.Tab("Tailored Resume"):
-                        changelog_display = gr.HTML(label="")
+                        changelog_display = gr.HTML()
                         resume_download = gr.File(
                             label="Download Tailored Resume (.docx)",
-                            interactive=False,
                         )
 
                     with gr.Tab("Cover Letter"):
@@ -525,7 +522,6 @@ def build_app() -> gr.Blocks:
                         )
                         cover_letter_download = gr.File(
                             label="Download Cover Letter (.txt)",
-                            interactive=False,
                         )
 
                     with gr.Tab("LinkedIn Outreach"):
@@ -536,7 +532,6 @@ def build_app() -> gr.Blocks:
                         )
                         outreach_download = gr.File(
                             label="Download Outreach Message (.txt)",
-                            interactive=False,
                         )
 
         generate_btn.click(
