@@ -395,18 +395,24 @@ HEADER_HTML = """
 
 # ── Main generator function ───────────────────────────────────────────────────
 
-def generate(resume_path: str, jd_text: str, company_name: str):
+def generate(resume_file, jd_text: str, company_name: str):
     """
     Gradio generator — yields 8-value tuples matching the outputs list.
     Progress display appears during the run and clears on success.
     On error it stays visible showing the error card.
+
+    In Gradio 5, gr.File returns a file object with a .name attribute
+    (the temp path). We normalise it to a plain path string here.
     """
-    if resume_path is None:
+    if resume_file is None:
         yield (
-            _error_html("Please upload a resume PDF before generating."),
+            _error_html("Please upload a resume .docx before generating."),
             "", "", "", None, "", None, None,
         )
         return
+
+    # Gradio 5 returns a file-like object; Gradio 4 returned a plain path string
+    resume_path = resume_file.name if hasattr(resume_file, "name") else resume_file
 
     if not jd_text or not jd_text.strip():
         yield (
@@ -476,7 +482,6 @@ def build_app() -> gr.Blocks:
                 resume_upload = gr.File(
                     label="Resume (.docx)",
                     file_types=[".docx"],
-                    type="filepath",
                 )
                 jd_input = gr.Textbox(
                     label="Job Description",
