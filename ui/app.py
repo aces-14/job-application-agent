@@ -469,7 +469,7 @@ def build_app() -> gr.Blocks:
 
         gr.HTML(HEADER_HTML)
 
-        with gr.Row(equal_height=False):
+        with gr.Row():
 
             # Left column — inputs
             with gr.Column(scale=2):
