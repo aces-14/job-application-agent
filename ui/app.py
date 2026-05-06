@@ -414,6 +414,13 @@ def generate(resume_file, jd_text: str, company_name: str):
     # Gradio 5 returns a file-like object; Gradio 4 returned a plain path string
     resume_path = resume_file.name if hasattr(resume_file, "name") else resume_file
 
+    if not str(resume_path).lower().endswith(".docx"):
+        yield (
+            _error_html("Please upload a <strong>.docx</strong> file (Word document). PDF is not supported."),
+            "", "", "", None, "", None, None,
+        )
+        return
+
     if not jd_text or not jd_text.strip():
         yield (
             _error_html("Please paste a job description before generating."),
@@ -464,10 +471,7 @@ def generate(resume_file, jd_text: str, company_name: str):
 
 def build_app() -> gr.Blocks:
     with gr.Blocks(
-        theme=gr.themes.Soft(
-            primary_hue="blue",
-            neutral_hue="slate",
-        ),
+        theme=gr.themes.Soft(),
         css=CSS,
         title="Job Application Assistant",
     ) as app:
@@ -480,7 +484,6 @@ def build_app() -> gr.Blocks:
             with gr.Column(scale=2):
                 resume_upload = gr.File(
                     label="Resume (.docx)",
-                    file_types=[".docx"],
                 )
                 jd_input = gr.Textbox(
                     label="Job Description",
