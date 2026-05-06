@@ -1,5 +1,13 @@
 ---
 title: Job Application Assistant
+emoji: 📄
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
 ---
 
 # Job Application Assistant Agent
@@ -20,7 +28,7 @@ An AI agent that takes your resume PDF, a job description, and a company name, t
 
 The agent runs a 9-step pipeline:
 
-1. **Parse Resume** — PDF → structured JSON (single source of truth)
+1. **Parse Resume** — DOCX → structured JSON (single source of truth)
 2. **Analyze JD** — Extracts required skills, ATS keywords, vagueness flags
 3. **Validate** — Checks inputs, warns if JD is too vague
 4. **Match Score** — Weighted resume–JD skills matrix (0–100%)
@@ -62,8 +70,9 @@ venv\Scripts\activate       # Windows
 pip install -r requirements.txt
 
 # 4. Set up environment variables
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY and TAVILY_API_KEY
+# Create a .env file with your API keys:
+# GROQ_API_KEY=your_key_here
+# TAVILY_API_KEY=your_key_here
 
 # 5. Run smoke tests
 python test_pipeline.py
