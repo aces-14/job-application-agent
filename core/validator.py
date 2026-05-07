@@ -1,3 +1,4 @@
+import re
 from typing import List, Tuple
 from dataclasses import dataclass, field
 from core.resume_parser import ResumeData
@@ -132,14 +133,52 @@ def check_integrity(
     )
     return report
 
+_STOP = {'and', 'or', 'the', 'of', 'in', 'for', 'with', 'to', 'a', 'an'}
+
+
+def _tokenize(s: str) -> list:
+    return [
+        t for t in re.split(r'[\s/,().&+\-]+', s.lower())
+        if len(t) >= 3 and t not in _STOP
+    ]
+
+
+def _tok_eq(a: str, b: str) -> bool:
+    """Token equality with fuzzy prefix match for plurals/variants."""
+    if a == b:
+        return True
+    if len(a) < 5 or len(b) < 5:
+        return False
+    n = min(len(a), len(b))
+    shared = next((i for i in range(n) if a[i] != b[i]), n)
+    # Match if shared prefix is ≥80% of the shorter token (min 5 chars)
+    return shared >= max(5, int(n * 0.8))
+
+
 def _skill_matches(resume_skill: str, jd_skill: str) -> bool:
-    """Semantic substring match — 'django' matches 'django rest framework'."""
+    """
+    Multi-strategy skill match:
+    1. Exact string equality
+    2. Substring containment (existing: 'django' in 'django rest framework')
+    3. Token match: ALL tokens of the shorter phrase found in the longer phrase,
+       with fuzzy prefix matching to handle plurals and minor variants
+       ('agile methodology' matches 'agile/scrum development methodologies',
+        'python django' matches 'Python (Django 4.x, Flask)')
+    """
     r = resume_skill.strip().lower()
     j = jd_skill.strip().lower()
     if r == j:
         return True
     shorter, longer = (r, j) if len(r) <= len(j) else (j, r)
-    return len(shorter) >= 3 and shorter in longer
+    if len(shorter) >= 3 and shorter in longer:
+        return True
+    r_toks = _tokenize(r)
+    j_toks = _tokenize(j)
+    if not r_toks or not j_toks:
+        return False
+    shorter_toks = r_toks if len(r_toks) <= len(j_toks) else j_toks
+    longer_toks  = j_toks if len(r_toks) <= len(j_toks) else r_toks
+    return all(any(_tok_eq(t, u) for u in longer_toks) for t in shorter_toks)
 
 
 def _partition_skills(
