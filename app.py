@@ -31,6 +31,26 @@ except ImportError:
 
 from ui.app import build_app
 
+# Patch gradio_client JSON schema bug present in Gradio 5.x:
+# _json_schema_to_python_type recurses into schema['additionalProperties'],
+# which JSON Schema allows to be a plain boolean (true = allow any extra
+# fields, false = allow none). gradio_client assumes it's always a dict and
+# does  "const" in schema  on the bool, raising TypeError. The fix: return
+# "any" whenever the schema value is not a dict.
+try:
+    import gradio_client.utils as _gcu
+
+    _orig_j2p = _gcu._json_schema_to_python_type
+
+    def _patched_j2p(schema, defs=None):
+        if not isinstance(schema, dict):
+            return "any"
+        return _orig_j2p(schema, defs)
+
+    _gcu._json_schema_to_python_type = _patched_j2p
+except Exception:
+    pass
+
 app = build_app()
 
 if __name__ == "__main__":
